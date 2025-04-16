@@ -28,11 +28,11 @@ responseTimeout: 60000
     chunkSize = +chunkSize;
     var query = new java.util.HashMap();
     query.put(''reduce'', ''false'');
-    if(__skip != null && __skip != "") {
-    	query.put(''skip'', ''''+ __skip);
+    if(c8oSkip != null && c8oSkip != "") {
+    	query.put(''skip'', ''''+ c8oSkip);
     }
-    if(__limit != null &&__limit != "") {
-    	query.put(''limit'', ''''+__limit);
+    if(c8oLimit != null && c8oLimit != "") {
+    	query.put(''limit'', ''''+c8oLimit);
     }
     //query.put(''include_docs'', ''true'');
     //query.put(''limit'', ''''+100);
@@ -308,5 +308,5 @@ responseTimeout: 60000
   value: 100
 ↓threads [variables.RequestableVariable-1744635115429]: 
   value: 2
-↓__skip [variables.RequestableVariable-1744838876006]: 
-↓__limit [variables.RequestableVariable-1744838877069]: 
+↓c8oSkip [variables.RequestableVariable-1744838876006]: 
+↓c8oLimit [variables.RequestableVariable-1744838877069]: 
