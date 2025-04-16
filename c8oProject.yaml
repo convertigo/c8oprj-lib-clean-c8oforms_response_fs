@@ -3,6 +3,7 @@
   comment: Mashup Sequencer project
   contextTimeout: 10000
   httpSessionTimeout: 10000
-  version: 1.0.4
+  version: 1.0.5
   ↓void [connectors.SqlConnector]: 🗏 connectors/void.yaml
   ↓DeleteB64FromExistingResponses [sequences.GenericSequence]: 🗏 sequences/DeleteB64FromExistingResponses.yaml
+  ↓Generic_Sequence [sequences.GenericSequence]: 🗏 sequences/Generic_Sequence.yaml

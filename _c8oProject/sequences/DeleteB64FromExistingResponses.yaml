@@ -1,4 +1,5 @@
 accessibility: Hidden
+authenticatedContextRequired: true
 responseTimeout: 60000
 ↓initChunkSizes [steps.SimpleStep-1744635115408]: 
   expression: |
@@ -27,6 +28,12 @@ responseTimeout: 60000
     chunkSize = +chunkSize;
     var query = new java.util.HashMap();
     query.put(''reduce'', ''false'');
+    if(__skip != null && __skip != "") {
+    	query.put(''skip'', ''''+ __skip);
+    }
+    if(__limit != null &&__limit != "") {
+    	query.put(''limit'', ''''+__limit);
+    }
     //query.put(''include_docs'', ''true'');
     //query.put(''limit'', ''''+100);
     //query.put(''skip'', ''''+0);
@@ -301,3 +308,5 @@ responseTimeout: 60000
   value: 100
 ↓threads [variables.RequestableVariable-1744635115429]: 
   value: 2
+↓__skip [variables.RequestableVariable-1744838876006]: 
+↓__limit [variables.RequestableVariable-1744838877069]: 
