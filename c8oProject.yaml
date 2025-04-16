@@ -1,0 +1,8 @@
+↑convertigo: 7.9.0.m006
+↓C8Oforms_cleanDB [core.Project]: 
+  comment: Mashup Sequencer project
+  contextTimeout: 10000
+  httpSessionTimeout: 10000
+  version: 1.0.4
+  ↓void [connectors.SqlConnector]: 🗏 connectors/void.yaml
+  ↓DeleteB64FromExistingResponses [sequences.GenericSequence]: 🗏 sequences/DeleteB64FromExistingResponses.yaml
