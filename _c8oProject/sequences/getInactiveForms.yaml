@@ -1,0 +1,139 @@
+↓getInactiveForms [steps.SimpleStep-1745399895128]: 
+  expression: |
+    '// Imports and helpers functions
+    include("js/common.js");
+    function writeFile(arr,sepratorChar,encoding){
+    	var char_output = new java.io.OutputStreamWriter(
+    		     new java.io.FileOutputStream(context.getProjectDirectory()+ "/temp/result.csv"),
+    		     encoding 
+    		 );
+    	for(var i = 0; i< arr.length; i++){
+    		var current = arr[i];
+    		if(i == 0){
+    			for(let elem in current){
+    				char_output.append(elem+"");
+    				char_output.append(sepratorChar);
+    			}
+    			char_output.append("\n");
+    		}
+    		for(let elem in current){
+    			char_output.append(current[elem]+"");
+    			char_output.append(sepratorChar);
+    		}
+    		char_output.append("\n");
+    		
+    	}
+    	char_output.flush();
+    	char_output.close();
+    }
+    
+    var r_0 = context.addTextNodeUnderRoot("result", "");
+    
+    // get incative forms
+    var query = new HashMap();
+    query.put(''reduce'', ''true'');
+    query.put(''group_level'', ''1'');
+    var resInactive = toJSON(fsclient.getView("c8oforms_response_fs", "clean", "getInactiveForms", query)).rows;
+    
+    //filter by date
+    var now = new Date();
+    now.setMonth(now.getMonth() - monthsAgo);
+    var filter = now.getTime();
+    resInactive = resInactive.filter((x)=>{
+    	return x.value.max < filter;
+    })
+    
+    
+    // get forms names and creator names
+    var ids = resInactive.map((x)=>{
+    	return x.key;
+    })
+    var query = new HashMap();
+    query.put(''reduce'', ''false'');
+    keys = toJettison(ids);
+    var resCreator = toJSON(fsclient.postView("c8oforms_fs", "clean", "forms_byCreatorAndName", query, keys)).rows;
+    
+    const groupedByName = resCreator.reduce((acc, item) => {
+      const { creator, name } = item.value;
+      if (!acc[creator]) {
+        acc[creator] = {forms: []};
+      }
+     _tot = resInactive.find((e)=>{
+    	return e.key == item.id
+    })
+    
+    if(_tot){
+    	tot = _tot.value.count;
+    }
+    else{
+    	tot = "??";
+    }
+      acc[creator].forms.push("Form: "+ name + " (id: "+item.id+", total réponses: "+ tot+")");
+      return acc;
+    }, {});
+    
+    const total = resInactive.reduce((acc, item) => {
+      const { count, max } = item.value;
+      acc += count
+      return acc;
+    }, 0);
+    
+    creatorKeys = resCreator.map((e)=>{
+    	return "C8Oreserved_" +e.value.creator;
+    })
+    
+    // docs of owners
+    var query = new HashMap();
+    query.put("include_docs", "true");
+    var resDocs = toJSON(fsclient.postAllDocs("c8oforms_fs", query, toJettison(creatorKeys))).rows;
+    resDocs = resDocs.map((e)=>{
+    	return e.doc;
+    })
+    
+    for(let author in groupedByName){
+    	var r = resDocs.find((e)=>{
+    		if(e){
+    			return e._id == "C8Oreserved_"+author
+    		}
+    		return false;
+    		
+    	});
+    	if(r != null){
+    		groupedByName[author].name = r.displayName;
+    		groupedByName[author].email = r.mail;
+    		groupedByName[author].trigramme = r._id.split("_")[1];
+    	}
+    }
+    
+    var results = [];
+    var node = context.addTextNode(r_0, "elem", "");
+    context.addTextNode(node, "total", total);
+    for(var elem in groupedByName){
+    	var node = context.addTextNode(r_0, "elem", "");
+    	context.addTextNode(node, "user", groupedByName[elem].name);
+    	context.addTextNode(node, "email", groupedByName[elem].email);
+    	context.addTextNode(node, "trigramme", groupedByName[elem].trigramme);
+    	context.addTextNode(node, "details", groupedByName[elem].forms.join(" | "));
+    	results.push({"user": groupedByName[elem].name, "email": groupedByName[elem].email, "trigramme": groupedByName[elem].trigramme, "details": groupedByName[elem].forms.join(" | ")})
+    }
+    
+    writeFile(results,";","UTF-8");
+    
+    
+    '
+↓Element [steps.XMLElementStep-1745415138697]: 
+  nodeName: attachment
+  ↓jAttribute [steps.AttributeStep-1745415138700]: 
+    nodeName: content-type
+    nodeText: application/csv
+  ↓jAttribute1 [steps.AttributeStep-1745415138703]: 
+    expression: context.getProjectDirectory() + "/temp/result.csv" 
+    nodeName: local-url
+  ↓jAttribute2 [steps.AttributeStep-1745415138706]: 
+    expression: '''result.csv'''
+    nodeName: name
+  ↓jAttribute3 [steps.AttributeStep-1745415138709]: 
+    nodeName: type
+    nodeText: attachment
+↓monthsAgo [variables.RequestableVariable-1745414011773]: 
+  value: 5

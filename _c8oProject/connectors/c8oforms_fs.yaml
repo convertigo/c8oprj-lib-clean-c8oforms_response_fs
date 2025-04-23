@@ -1,0 +1,24 @@
+databaseName: c8oforms_fs
+↓GetServerInfo [transactions.couchdb.GetServerInfoTransaction]: 
+  ↑default: true
+↓clean [couchdb.DesignDocument]: 
+  docdata: 
+    →: |
+      '{
+        "_id": "_design\/clean",
+        "filters": {},
+        "updates": {},
+        "views": {
+          "forms_byCreatorAndName": {
+            "map": "function (doc) {\r\n
+          try {\r\n
+              if (doc.c8o_view_type_drafts_form === true || doc.c8o_view_type_published_form === true) {\r\n
+                  emit(doc._id, { \"creator\": doc.creator, \"name\": doc.name });\r\n
+              }\r\n
+          } catch (err) {\r\n
+              log(err.message);\r\n
+          }\r\n
+      }"
+          }
+        }
+      }'
