@@ -1,0 +1,108 @@
+accessibility: Hidden
+authenticatedContextRequired: true
+responseTimeout: 600000
+↓inputVars [steps.InputVariablesStep-1745939138816]: 
+↓myVariable [steps.SimpleSourceStep-1745939237148]: 
+  sourceDefinition: 
+    - xmlizable: 
+      - ↑classname: com.twinsoft.convertigo.beans.common.XMLVector
+      - com.twinsoft.convertigo.beans.common.XMLVector: 
+        - java.lang.String: 
+          - ↑value: 1745939138816
+        - java.lang.String: 
+          - ↑value: ./csv/text()
+  variableName: csvPath
+↓Clean [steps.SimpleStep-1745938386447]: 
+  expression: |
+    'var enums = com.twinsoft.convertigo.engine.enums;
+    var HashMap = java.util.HashMap;
+    var theApp = com.twinsoft.convertigo.engine.Engine.theApp;
+    var fsclient = theApp.couchDbManager.getFullSyncClient();
+    var FileReader = java.io.FileReader;
+    var BufferedReader = java.io.BufferedReader;
+    
+    var toJSON = function(json) {
+    	return JSON.parse(json.toString());
+    }
+    var toJettison = function(json) {
+    	var txt = (typeof json == "string") ? json : JSON.stringify(json);
+    	return txt.startsWith("{") ? new org.codehaus.jettison.json.JSONObject(txt) : new org.codehaus.jettison.json.JSONArray(txt);
+    }
+    
+    var readCSV = (filePath) => {
+    	var reader = new BufferedReader(new FileReader(filePath));
+    	    var line;
+    	    var firstColumnData = [];
+    
+    	    try {
+    	        while ((line = reader.readLine()) != null) {
+    	            var values = line.split(separator);
+    	            if (values.length > 0) {
+    	                firstColumnData.push(values[0].trim());
+    	            }
+    	        }
+    	    } finally {
+    	        reader.close();
+    	    }
+    
+    	    return firstColumnData;
+    }
+    
+    var postBulkDocs = function(db, docs, all_or_nothing, new_edits, policy, mergeRules, useHash) {
+    	
+    	try{
+    		var result = fsclient.postBulkDocs(db, docs, all_or_nothing, new_edits, policy, mergeRules, useHash);
+    		return JSON.parse(result);
+    		
+    	}
+    	catch(e){
+    		return {error: true};
+    	}
+    	
+    }
+    
+    execute = execute == "true";
+    var data = readCSV(csvPath);
+    
+    var r_0 = context.addTextNodeUnderRoot("result", "");
+    context.addTextNode(r_0, "execute", ""+execute);
+    for(var i = 0; i< data.length; i++){
+    	var node = context.addTextNode(r_0, data[i], "");
+    	context.addTextNode(node, "published_doc", data[i]);
+    	context.addTextNode(node, "annonymous_doc", data[i]+ "_annonymous");
+    	context.addTextNode(node, "pwa_doc", data[i]+ "_pwa_document");
+    	var query = new HashMap();
+    	query.put(''reduce'', ''false'');
+    	keys = toJettison([data[i]]);
+    	var residsToBeDeleted = toJSON(fsclient.postView("c8oforms_response_fs", "clean", "getByIdsClean", query, keys)).rows;
+    	var node2 = context.addTextNode(node, ''responses'', "");
+    	residsToBeDeleted = residsToBeDeleted.map((x)=>{
+    		return x.id
+    	})
+    	for(var j = 0; j < residsToBeDeleted.length; j++){
+    		context.addTextNode(node2, "response_"+j, residsToBeDeleted[j]);
+    	}
+    	
+    	if(execute){
+    		var docs = [{_id: data[i], "_deleted": true}, {_id: data[i]+ "_annonymous", "_deleted": true}, {_id: data[i]+ "_pwa_document", "_deleted": true}];
+    		docs = toJettison(docs);
+    
+    		var postBulk = postBulkDocs("c8oforms_fs", docs, false, true, enums.CouchPostDocumentPolicy.merge, new java.util.HashMap(), true);
+    		log.warn("postBulk result::: " + JSON.stringify(postBulk));
+    		
+    		var docs2 = residsToBeDeleted.map((x)=>{
+    			return {_id: x, "_deleted": true};
+    		})
+    		docs2 = toJettison(docs2);
+    
+    		var postBulk2 = postBulkDocs("c8oforms_response_fs", docs2, false, true, enums.CouchPostDocumentPolicy.merge, new java.util.HashMap(), true);
+    		log.warn("postBulk2 result::: " + JSON.stringify(postBulk2));
+    	}
+    }
+    '
+↓csv [variables.RequestableVariable-1745939120487]: 
+  isFileUpload: true
+↓separator [variables.RequestableVariable-1745939646464]: 
+  value: ;
+↓execute [variables.RequestableVariable-1745941834068]: 
+  value: false

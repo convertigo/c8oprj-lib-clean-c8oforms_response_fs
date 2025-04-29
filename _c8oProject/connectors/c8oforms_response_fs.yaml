@@ -12,7 +12,7 @@ databaseName: c8oforms_response_fs
           "getInactiveForms": {
             "map": "function (doc) {\r\n
           try {\r\n
-              if (doc.formId && doc.timestamp) {\r\n
+              if (doc.formId && doc.timestamp && doc.formId.indexOf(\"published_\")!= -1) {\r\n
                   emit(doc.formId, doc.timestamp);\r\n
               }\r\n
           } catch (err) {\r\n
@@ -35,6 +35,17 @@ databaseName: c8oforms_response_fs
         }\r\n
       }\r\n
       "
+          },
+          "getByIdsClean": {
+            "map": "function (doc) {\r\n
+          try {\r\n
+              if (doc.formId) {\r\n
+                  emit(doc.formId, doc._rev);\r\n
+              }\r\n
+          } catch (err) {\r\n
+              log(err.message);\r\n
+          }\r\n
+      }"
           }
         }
       }'

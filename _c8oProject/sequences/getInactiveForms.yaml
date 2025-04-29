@@ -1,3 +1,5 @@
+accessibility: Hidden
+authenticatedContextRequired: true
 ↓getInactiveForms [steps.SimpleStep-1745399895128]: 
   expression: |
     '// Imports and helpers functions
